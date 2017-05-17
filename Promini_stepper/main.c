@@ -12,10 +12,10 @@
 #include <stdio.h>
 #include <avr/interrupt.h>
 
-#define CLOCKWISE PIND & (1<<PD3)
-#define PRESSED_STOP PIND & (1<<PD2)
-#define clockWise false
-#define antiClockWise true
+#define CLOCKWISE PIND & (1<<PD2)
+#define PRESSED_STOP PIND & (1<<PD5)
+#define clockWise true
+#define antiClockWise false
 
 int _step_1 = 0;
 int _step_2 = 0;
@@ -50,16 +50,16 @@ int main(void)
 	DDRD = (1<<DDD7)|(1<<DDD6);
 	DDRB |= (1<<DDB1)|(1<<DDB0);
 	sei();
-	EICRA |= (1<<ISC10);
+	EICRA |= (1<<ISC00);
 	//|(1<<ISC00)|(1<<ISC01);
-	EIMSK |= (1<<INT1);
+	EIMSK |= (1<<INT0);
 	//|(1<<INT0);
 	setToZeroPoint();
 
     /* Replace with your application code */
     while (1) 
     {
-		if(PRESSED_STOP && (dir==clockWise)){
+		if(PRESSED_STOP && (dir==antiClockWise)){
 			Stop();
 			setInitialState();
 		}
@@ -120,15 +120,15 @@ int main(void)
 				}
 	
 				if(dir) {
-					_step_1++;
+					_step_1--;
 					rotation++;
 					} else {
-					_step_1--;
+					_step_1++;
 				}
-				if(_step_1 > 3) {
-					_step_1 = 0;
-					} else if (_step_1 < 0) {
-					_step_1=3;
+				if(_step_1 < 0) {
+					_step_1 = 3;
+					} else if (_step_1 > 3) {
+					_step_1=0;
 				}
 				if(rotation > 530) {
 					rotation=0;
@@ -143,7 +143,7 @@ int main(void)
     }
 }
 		
-	ISR(INT1_vect) {
+	ISR(INT0_vect) {
 	_delay_ms(5);
 		if(CLOCKWISE){
 			dir=antiClockWise;
