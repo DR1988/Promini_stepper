@@ -17,11 +17,13 @@
 #define clockWise true
 #define antiClockWise false
 
+
 int _step_1 = 0;
 int _step_2 = 0;
 int rotation = 0;
 bool dir = clockWise;
 bool move = false;
+bool setToZero = true;
 
 void setInitialState() {
 	_step_1 = 0;
@@ -31,7 +33,7 @@ void setInitialState() {
 }
 
 void setToZeroPoint() {
-	dir=clockWise;
+	dir=antiClockWise;
 	move = true;
 	rotation=0;
 }
@@ -51,7 +53,7 @@ int main(void)
 	DDRB |= (1<<DDB1)|(1<<DDB0);
 	sei();
 	EICRA |= (1<<ISC00);
-	//|(1<<ISC00)|(1<<ISC01);
+	//|(1<<ISC00)
 	EIMSK |= (1<<INT0);
 	//|(1<<INT0);
 	setToZeroPoint();
@@ -60,11 +62,18 @@ int main(void)
     while (1) 
     {
 		if(PRESSED_STOP && (dir==antiClockWise)){
-			Stop();
-			setInitialState();
+			if(setToZero) {
+				dir=clockWise;
+				move = true;
+				setToZero = false;
+				rotation=0;
+			} else {
+				Stop();
+				setInitialState();			
+			}
 		}
 
-		switch (_step_2)
+		/* switch (_step_2)
 		{
 			case 0:
 				PORTC |= (1<<PC3);
@@ -91,6 +100,10 @@ int main(void)
 				PORTC |= (1<<PC0);
 			break;
 		}
+		_step_2++;
+		if(_step_2 > 3) {
+			_step_2 = 0;
+		}*/
 			if (move) {
 				switch (_step_1){
 					case 0:
@@ -122,7 +135,12 @@ int main(void)
 				if(dir) {
 					_step_1--;
 					rotation++;
+					if(rotation > 490) {
+						//rotation=0;
+						Stop();
+						}
 					} else {
+					rotation--;
 					_step_1++;
 				}
 				if(_step_1 < 0) {
@@ -130,15 +148,9 @@ int main(void)
 					} else if (_step_1 > 3) {
 					_step_1=0;
 				}
-				if(rotation > 530) {
-					rotation=0;
-					Stop();
-				}
+
 			}
-			_step_2++;
-			if(_step_2 > 3) {
-				_step_2 = 0;
-			}
+
 			_delay_ms(2);
     }
 }
@@ -147,12 +159,12 @@ int main(void)
 	_delay_ms(5);
 		if(CLOCKWISE){
 			dir=antiClockWise;
-			rotation=0;
+			//rotation=0;
 			move = true;
 		}
 		else {
 			dir=clockWise;
-			rotation=0;
+			//rotation=0;
 			move = true;
 		}
 	}
